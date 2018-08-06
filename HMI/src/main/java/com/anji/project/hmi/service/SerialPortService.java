@@ -1,7 +1,5 @@
 package com.anji.project.hmi.service;
 
-import org.springframework.context.ApplicationListener;
-
 public interface SerialPortService  {
 
     /**
@@ -27,7 +25,6 @@ public interface SerialPortService  {
      * 四种监听状态
      */
     enum PortState {
-
         NOT_START, FAIL, STOP,SUCCESS
     }
 }

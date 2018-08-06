@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class SerialPortServiceImpl implements SerialPortService {
 
     private final static Logger logger = LoggerFactory.getLogger(SerialPortServiceImpl.class);
-    private final BlockingDeque<byte[]> dataQueue = new LinkedBlockingDeque<>(64);
+    private final BlockingDeque<byte[]> dataQueue = new LinkedBlockingDeque<>();
     private SerialPort serialPort;
     private final Consumer consumer = new Consumer();
     private volatile PortState serviceState = PortState.NOT_START;
@@ -64,6 +64,7 @@ public class SerialPortServiceImpl implements SerialPortService {
     @Override
     @PreDestroy
     public void stop() {
+        serviceState = PortState.STOP;
         serialPort.close();
         consumer.stop();
     }
@@ -123,7 +124,8 @@ public class SerialPortServiceImpl implements SerialPortService {
         private final Integer PACKAGE_LENGTH = 1 + 12 + 4 + 4 + 1 + 2 + 2 + 2 + 1 + 1 + 1;
         private final Integer startMark = 0x55;
         private final Integer endMark = 0xAA;
-        private final Long sleepTime=200l;
+        private final Long sleepTime = 100L;
+
         @Override
         public void serialEvent(SerialPortEvent serialPortEvent) {
             if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
