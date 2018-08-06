@@ -5,12 +5,12 @@ public interface SerialPortService  {
     /**
      * 启动串口监听
      */
-    void start();
+   void start();
 
     /**
      * 终止串口监听
      */
-    void stop();
+   void stop();
 
     /**
      * 获取目前监听状态
@@ -28,4 +28,3 @@ public interface SerialPortService  {
         NOT_START, FAIL, STOP,SUCCESS
     }
 }
-

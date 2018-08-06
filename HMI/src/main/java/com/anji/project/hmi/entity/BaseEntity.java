@@ -1,6 +1,5 @@
 package com.anji.project.hmi.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,11 +18,9 @@ public class BaseEntity {
     private Integer id;
 
     @CreatedDate
-    @JsonIgnore
     private Long createTime;
 
     @LastModifiedDate
-    @JsonIgnore
     private Long updateTime;
 
     public Integer getId() {
