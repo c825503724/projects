@@ -18,4 +18,10 @@ public class HMI {
     public void ss() {
 //        hmiRecordRepository.queryLatestHMIRecord();
     }
+
+    @Test
+    public void btyeTest(){
+       byte[]bytes=new byte[2];
+      System.out.println(Integer.toHexString(12));
+    }
 }
