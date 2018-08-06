@@ -214,7 +214,6 @@ public class SerialPortServiceImpl implements SerialPortService {
         return bytes;
     }
 
-    private Integer count = 0;
 
     //串口拿到的数据入队列
     private void enqueue(byte[] bytes) {
