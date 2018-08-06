@@ -3,7 +3,6 @@ package com.anji.project.hmi.service;
 import com.anji.project.hmi.entity.HMIRecord;
 import com.anji.project.hmi.repository.HMIRecordRepository;
 import com.anji.project.hmi.util.ByteNumberTransfer;
-import com.anji.project.hmi.util.ByteStringTransfer;
 import gnu.io.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TooManyListenersException;
@@ -32,11 +30,10 @@ import java.util.concurrent.TimeUnit;
 public class SerialPortServiceImpl implements SerialPortService {
 
     private final static Logger logger = LoggerFactory.getLogger(SerialPortServiceImpl.class);
-    private final BlockingDeque<byte[]> dataQueue = new LinkedBlockingDeque<>(64);
+    private final BlockingDeque<byte[]> dataQueue = new LinkedBlockingDeque<>();
     private SerialPort serialPort;
     private final Consumer consumer = new Consumer();
-
-    private volatile PortState serviceState;
+    private volatile PortState serviceState = PortState.NOT_START;
 
     @Autowired
     @Lazy
@@ -45,27 +42,35 @@ public class SerialPortServiceImpl implements SerialPortService {
     @Value("${com.serialPortName}")
     private String serialPortName;
 
-    /**
-     * 系统启动时候开始监听串口
-     *
-     * @param event
-     */
+
     @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof ApplicationReadyEvent) {
+    public void start() {
+        if (serviceState == PortState.NOT_START || serviceState == PortState.FAIL) {
             if (init()) {
-                serviceState=PortState.SUCCESS;
+                serviceState = PortState.SUCCESS;
                 Timer timer = new Timer();
                 timer.schedule(consumer, 1000 * 2);
-            }else {
-                serviceState=PortState.FAIL;
+            } else {
+                serviceState = PortState.FAIL;
             }
         }
     }
 
     @Override
-    public boolean init() {
+    public Integer getMessageLengthNotConsumed() {
+        return dataQueue.size();
+    }
 
+    @Override
+    @PreDestroy
+    public void stop() {
+        serviceState = PortState.STOP;
+        serialPort.close();
+        consumer.stop();
+    }
+
+
+    private boolean init() {
         CommPortIdentifier port;
         try {
             port = CommPortIdentifier.getPortIdentifier(serialPortName);
@@ -78,7 +83,7 @@ public class SerialPortServiceImpl implements SerialPortService {
         if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
             try {
                 // 打开串口名字为COM_1(名字任意),延迟为2毫秒
-                serialPort = (SerialPort) port.open(serialPortName, 2000);
+                serialPort = (SerialPort) port.open(serialPortName, 200);
             } catch (PortInUseException e) {
                 logger.error(String.format("端口:%s被占用！", serialPortName), e);
                 return false;
@@ -109,12 +114,6 @@ public class SerialPortServiceImpl implements SerialPortService {
     }
 
 
-    @PreDestroy
-    public void destroy() {
-        //todo 销毁动作
-        consumer.stop();
-    }
-
     @Override
     public PortState getServiceState() {
         return serviceState;
@@ -122,25 +121,66 @@ public class SerialPortServiceImpl implements SerialPortService {
 
     //生产者
     public class COMListener implements SerialPortEventListener {
+        private final Integer PACKAGE_LENGTH = 1 + 12 + 4 + 4 + 1 + 2 + 2 + 2 + 1 + 1 + 1;
+        private final Integer startMark = 0x55;
+        private final Integer endMark = 0xAA;
+        private final Long sleepTime = 100L;
 
         @Override
         public void serialEvent(SerialPortEvent serialPortEvent) {
             if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-                byte[] data = null;
-                byte[] crc = null;
-                data = readFromPort(serialPort);
-                String dataOriginal = ByteStringTransfer.bytes2ToHexString(data);
-                String dataValid = "";//合法数据流
-                crc = ByteNumberTransfer.getByteArray(getCrc(data));//CRC校验
-                if (data == null || data.length < 1) {    //检查数据是否读取正确
-                } else if (data[0] == 0x55 && data[31] == (byte) 0xAA /*&& data[29] == crc[0] && data[30] == crc[1]*/) {
-                    dataValid = dataOriginal.substring(2);
-                    if (dataValid == null || dataValid.length() < 1) {    //检查写入数据是否正确
-                        throw new RuntimeException("数据写入错误");
-                    } else {
-                        enqueue(data);
-                    }
+//                byte[] data = null;
+//                byte[] crc = null;
+                try {
+                    TimeUnit.MILLISECONDS.sleep(sleepTime);
+                } catch (InterruptedException e) {
+
                 }
+                readAndSaveSerialData(serialPort);
+//                data = readFromPort(serialPort);
+//                String dataOriginal = ByteStringTransfer.bytes2ToHexString(data);
+//                String dataValid = "";//合法数据流
+//                crc = ByteNumberTransfer.getByteArray(getCrc(data));//CRC校验
+//                if (data == null || data.length < 1) {    //检查数据是否读取正确
+//                } else if (data[0] == 0x55 && data[31] == (byte) 0xAA /*&& data[29] == crc[0] && data[30] == crc[1]*/) {
+//                    dataValid = dataOriginal.substring(2);
+//                    if (dataValid == null || dataValid.length() < 1) {    //检查写入数据是否正确
+//                        throw new RuntimeException("数据写入错误");
+//                    } else {
+//                        enqueue(data);
+//                    }
+//                }
+            }
+        }
+
+        private void readAndSaveSerialData(SerialPort serialPort) {
+            try {
+                InputStream in = serialPort.getInputStream();
+                byte[] r = new byte[PACKAGE_LENGTH];
+                int data;
+                int index = 0;
+                while ((data = in.read()) != -1) {
+                    if (data == startMark) {
+                        if (r[0] == 0) {
+                            r[0] = (byte) data;
+                        } else {
+                            r = new byte[PACKAGE_LENGTH];
+                        }
+                    } else if (data == endMark) {
+                        r[index] = (byte) data;
+                        if (index == PACKAGE_LENGTH - 1) {
+                            enqueue(r);
+                        }
+                        r = new byte[PACKAGE_LENGTH];
+                        index = 0;
+                        continue;
+                    } else {
+                        r[index] = (byte) data;
+                    }
+                    ++index;
+                }
+            } catch (IOException ioe) {
+                logger.error("串口读取错误", ioe);
             }
         }
     }
@@ -173,6 +213,7 @@ public class SerialPortServiceImpl implements SerialPortService {
         }
         return bytes;
     }
+
 
     //串口拿到的数据入队列
     private void enqueue(byte[] bytes) {
