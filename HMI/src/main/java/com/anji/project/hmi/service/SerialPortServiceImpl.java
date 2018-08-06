@@ -123,14 +123,14 @@ public class SerialPortServiceImpl implements SerialPortService {
         private final Integer PACKAGE_LENGTH = 1 + 12 + 4 + 4 + 1 + 2 + 2 + 2 + 1 + 1 + 1;
         private final Integer startMark = 0x55;
         private final Integer endMark = 0xAA;
-
+        private final Long sleepTime=200l;
         @Override
         public void serialEvent(SerialPortEvent serialPortEvent) {
             if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 //                byte[] data = null;
 //                byte[] crc = null;
                 try {
-                    TimeUnit.MILLISECONDS.sleep(200l);
+                    TimeUnit.MILLISECONDS.sleep(sleepTime);
                 } catch (InterruptedException e) {
 
                 }

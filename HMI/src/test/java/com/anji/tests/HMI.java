@@ -2,6 +2,7 @@ package com.anji.tests;
 
 import com.anji.project.hmi.HMIApplication;
 import com.anji.project.hmi.repository.HMIRecordRepository;
+import com.anji.project.hmi.service.SerialPortService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,14 @@ public class HMI {
 
     @Autowired
     private HMIRecordRepository hmiRecordRepository;
-    @Test
-    public void ss() {
-//        hmiRecordRepository.queryLatestHMIRecord();
-    }
+
+    @Autowired
+    private SerialPortService serialPortService;
 
     @Test
-    public void btyeTest(){
-       byte[]bytes=new byte[2];
-      System.out.println(Integer.toHexString(12));
+    public void ss() {
+
     }
+
+
 }

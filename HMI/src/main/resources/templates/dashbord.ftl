@@ -53,8 +53,7 @@
         <label style="vertical-align: middle;display:inline-block">当前段:<input class="inputc" id="segment"></label>
         <label style="vertical-align: middle;display:inline-block">操作状态:<input class="inputc"
                                                                                id="operation_state"></label>
-        <label style="vertical-align: middle;display:inline-block">通信状态:<input class="inputc"
-                                                                               id="communicate_state"></label>
+        <label style="vertical-align: middle;display:inline-block">通信状态:<input class="inputc" id="communicate_state"></label>
     </div>
     <div class="container">
         <canvas id="hmi-speed" data-type="radial-gauge"
