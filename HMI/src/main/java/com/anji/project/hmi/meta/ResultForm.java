@@ -1,6 +1,4 @@
-package com.anji.project.hmi.model;
-
-import com.anji.project.hmi.meta.ResultEnum;
+package com.anji.project.hmi.meta;
 
 import java.io.Serializable;
 
