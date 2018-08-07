@@ -7,8 +7,8 @@
     <title>hmi 仪表盘</title>
     <link rel="stylesheet" type="text/css" href="css/normalize.css"/>
     <link rel="stylesheet" type="text/css" href="css/zzsc-demo.css"/>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+    <#--<link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>-->
+    <#--<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">-->
     <style type="text/css">
         .btn-container {
             padding: 1em 0;
@@ -32,8 +32,8 @@
     </style>
     <script src="js/gauge.min.js"></script>
     <script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/boostrap.js"></script>
-    <script src="js/npm.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <#--<script src="js/npm.js"></script>-->
 </head>
 <body>
 <div class="zzsc-container">
