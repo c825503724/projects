@@ -7,6 +7,8 @@
     <title>hmi 仪表盘</title>
     <link rel="stylesheet" type="text/css" href="css/normalize.css"/>
     <link rel="stylesheet" type="text/css" href="css/zzsc-demo.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
     <style type="text/css">
         .btn-container {
             padding: 1em 0;
@@ -30,6 +32,8 @@
     </style>
     <script src="js/gauge.min.js"></script>
     <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/boostrap.js"></script>
+    <script src="js/npm.js"></script>
 </head>
 <body>
 <div class="zzsc-container">
@@ -48,13 +52,10 @@
             <label style="vertical-align: middle;display:inline-block">车号:<input class="inputc" id="car_number"></label>
             <label style="vertical-align: middle;display:inline-block">位置x:<input class="inputc" id="position_x"></label>
             <label style="vertical-align: middle;display:inline-block">位置y:<input class="inputc" id="position_y"></label>
-            <label style="vertical-align: middle;display:inline-block">当前点:<input class="inputc"
-                                                                                  id="current_position"></label>
-            <label style="vertical-align: middle;display:inline-block">目标点:<input class="inputc"
-                                                                                  id="target_position"></label>
+            <label style="vertical-align: middle;display:inline-block">当前点:<input class="inputc" id="current_position"></label>
+            <label style="vertical-align: middle;display:inline-block">目标点:<input class="inputc" id="target_position"></label>
             <label style="vertical-align: middle;display:inline-block">当前段:<input class="inputc" id="segment"></label>
-            <label style="vertical-align: middle;display:inline-block">操作状态:<input class="inputc"
-                                                                                   id="operation_state"></label>
+            <label style="vertical-align: middle;display:inline-block">操作状态:<input class="inputc" id="operation_state"></label>
             <label style="vertical-align: middle;display:inline-block">通信状态:<input class="inputc" id="communicate_state"></label>
         </div>
         <canvas id="hmi-speed" data-type="radial-gauge"

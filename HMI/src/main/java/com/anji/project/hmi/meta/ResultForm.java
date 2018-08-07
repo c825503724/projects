@@ -10,7 +10,7 @@ public class ResultForm<T> implements Serializable {
     private static final long serialVersionUID = -8894023977967338570L;
 
     private String key;
-    private int status = 0;
+    private int status ;
     private T result;
     private String message;
 
