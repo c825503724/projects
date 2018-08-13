@@ -151,8 +151,12 @@ var actionCollections = new ActionCollections();
                                     dashbord.layers[o].show();
                                 }
                             },
-                            update: function (data) {
-
+                            update: function (record) {
+                                    this.updateCompass(record['theta']);
+                                    this.updateBatteryState(record['power']);
+                                    this.updateSpeed(record['speed']);
+                                    this.updateLables([record['locationX'],record['locationY'],
+                                    record['number'],record['location'],record['targetLocation'],record['route'],record['operationStatus'],record['communicationStatus']]);
                             },
                             updateLables: function (data) {
                                 var layer = dashbord.layers.labelLayer;
@@ -179,9 +183,9 @@ var actionCollections = new ActionCollections();
                         };
                         var speedLayer = new Konva.Layer({
                             x: 0,
-                            y: window.innerHeight / 2,
+                            y: window.innerHeight / 3,
                             listening: false,
-                            id: 'speedLayer',
+                            id: 'speedLayer'
                         });
                         var batteryLayer = speedLayer.clone({
                             x: wWidth * 2 / 3,
@@ -267,7 +271,7 @@ var actionCollections = new ActionCollections();
                                 id: 'speed',
                                 sceneFunc: function (context) {
                                     drawSpeedDashbord(context, v);
-                                },
+                                }
                             });
                             layer.add(speedDashBord);
 
@@ -691,7 +695,7 @@ var actionCollections = new ActionCollections();
                                     */
 
                                     var centerX = wWidth * 2 / 10,
-                                        centerY = wHeight - 100,
+                                        centerY = wHeight *6/8,
                                         radius = 80,
                                         outerRadius = 90;
 
@@ -751,6 +755,7 @@ var actionCollections = new ActionCollections();
 
                                     if (iTargetSpeed == iCurrentSpeed) {
                                         clearTimeout(job);
+                                        options.ctx.restore();
                                         return;
                                     } else if (iTargetSpeed < iCurrentSpeed) {
                                         bDecrement = true;
@@ -773,6 +778,7 @@ var actionCollections = new ActionCollections();
                                     job = setTimeout(function () {
                                         draw();
                                     }, 5);
+
                                 }
 
                                 function drawWithInputValue(v) {

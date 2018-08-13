@@ -1,5 +1,6 @@
 package com.anji.project.hmi.service;
 
+import com.anji.project.hmi.contoller.WebSocket;
 import com.anji.project.hmi.entity.HMIRecord;
 import com.anji.project.hmi.repository.HMIRecordRepository;
 import com.anji.project.hmi.util.ByteNumberTransfer;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TooManyListenersException;
@@ -39,9 +42,49 @@ public class SerialPortServiceImpl implements SerialPortService {
     @Lazy
     private HMIRecordRepository hmiRecordRepository;
 
+
     @Value("${com.serialPortName}")
     private String serialPortName;
 
+    @Value("${hmi.mock}")
+    private Boolean mock;
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof ApplicationReadyEvent) {
+            start();
+            System.out.println("start!");
+            if (mock) {
+                Timer timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        WebSocket.sendMessageToAll(getRandomRecord());
+                    }
+                }, 2000L, 2000L);
+            }
+        }
+    }
+
+    private final float[] floats = {0.0F, 20.0F, 50.0F, 33.0F, 90.0F, 77.5f};
+    private final int[] ints = {22, 44, 652, 10, 9, 88};
+
+    private HMIRecord getRandomRecord() {
+        HMIRecord record = new HMIRecord();
+        Random random = new Random();
+        record.setTheta(floats[random.nextInt(6)]);
+        record.setLocation(ints[random.nextInt(6)]);
+        record.setPower(floats[random.nextInt(6)]);
+        record.setTargetLocation(ints[random.nextInt(6)]);
+        record.setSpeed(floats[random.nextInt(6)]);
+        record.setOperationStatus(ints[random.nextInt(6)]);
+        record.setRoute(ints[random.nextInt(6)]);
+        record.setNumber(ints[random.nextInt(6)]);
+        record.setCommunicationStatus(ints[random.nextInt(6)]);
+        record.setLocationY(floats[random.nextInt(6)]);
+        record.setLocationX(floats[random.nextInt(6)]);
+        return record;
+    }
 
     @Override
     public void start() {

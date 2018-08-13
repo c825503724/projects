@@ -1,5 +1,7 @@
 package com.anji.project.hmi.contoller;
 
+import com.anji.project.hmi.config.WebsocketConfig;
+import com.anji.project.hmi.util.WebsocketEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,45 +15,56 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * created by chenpeng at 2018/8/10-19:47
  */
-@ServerEndpoint(value = "/freshData")
+@ServerEndpoint(value = "/freshData",configurator = WebsocketConfig.class,
+                encoders = {WebsocketEncoder.class})
 @Component
 public class WebSocket {
-    private static AtomicInteger liveLinks=new AtomicInteger();
+    private static AtomicInteger liveLinks = new AtomicInteger();
 
-    private static CopyOnWriteArrayList<WebSocket> sockets=new CopyOnWriteArrayList<>();
+    private static CopyOnWriteArrayList<WebSocket> sockets = new CopyOnWriteArrayList<>();
 
     private Session session;
 
-    private static final Logger logger= LoggerFactory.getLogger(WebSocket.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSocket.class);
 
     @OnOpen
-    public void onOpen(Session session){
-        this.session=session;
+    public void onOpen(Session session,EndpointConfig endpointConfig) {
+        String httpSessionId=(String)endpointConfig.getUserProperties().get("sessionId");
+        this.session = session;
         sockets.add(this);
         liveLinks.addAndGet(1);
     }
 
     @OnClose
-    public void onClose(){
+    public void onClose() {
         sockets.remove(this);
         liveLinks.decrementAndGet();
     }
 
     @OnError
-    public void onError(Session session,Throwable throwable){
-        logger.error("websocket异常错误!",throwable);
+    public void onError(Session session, Throwable throwable) {
+        logger.error("websocket异常错误!", throwable);
     }
 
     @OnMessage
-    public void onMessage(String message,Session session){
+    public void onMessage(String message, Session session) {
         System.out.println(message);
     }
 
-    public void senMessage(Object message)throws IOException {
+    public static void sendMessageToAll(Object message){
+        for(WebSocket webSocket:WebSocket.sockets){
+            webSocket.sendMessage(message);
+        }
+    }
+    private void sendMessage(Object message) {
         try {
-            this.session.getBasicRemote().sendObject(message);
-        }catch (EncodeException e){
-            logger.error("websocket解码错误！",e);
+            if (this.session != null) {
+                this.session.getBasicRemote().sendObject(message);
+            }
+        } catch (EncodeException e) {
+            logger.error("websocket解码错误！", e);
+        } catch (IOException ioe) {
+            logger.error("io异常", ioe);
         }
     }
 

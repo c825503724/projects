@@ -11,6 +11,12 @@ websocket.onopen=function (event) {
 websocket.onclose=function () {
     console.log('websocket close!');
 };
-window.onbeforeunload=function () {
+websocket.onbeforeunload=function () {
     websocket.close();
+};
+websocket.onmessage=function (ev) {
+    if(ev instanceof MessageEvent){
+        var record=JSON.parse(ev.data);
+        pages.dashbord.update(record);
+    }
 };

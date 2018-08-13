@@ -1,6 +1,10 @@
 package com.anji.project.hmi.service;
 
-public interface SerialPortService  {
+import org.springframework.boot.context.event.ApplicationStartingEvent;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+
+public interface SerialPortService extends ApplicationListener<ApplicationEvent> {
 
     /**
      * 启动串口监听
