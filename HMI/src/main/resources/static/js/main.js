@@ -5,7 +5,7 @@ var stage = new Konva.Stage({
     width: wWidth,
     height: wHeight
 });
-var imageUrlPrix = '/Users/admin/Desktop/canvas/img/';
+var imageUrlPrix = '/hmi/img/';
 var konvaConfig = {
     'labelSpace': 30
 };
@@ -13,10 +13,10 @@ var konvaConfig = {
 var source = {
     'backgroud': imageUrlPrix + 'background.jpg',
     'dashbord': imageUrlPrix + 'dashbord.png',
-    '25_battery': imageUrlPrix + '/battery/25_battery.png',
-    '50_battery': imageUrlPrix + '/battery/50_battery.png',
-    '75_battery': imageUrlPrix + '/battery/75_battery.png',
-    '100_battery': imageUrlPrix + '/battery/100_battery.png',
+    '25_battery': imageUrlPrix + 'battery/25_battery.png',
+    '50_battery': imageUrlPrix + 'battery/50_battery.png',
+    '75_battery': imageUrlPrix + 'battery/75_battery.png',
+    '100_battery': imageUrlPrix + 'battery/100_battery.png',
     'needle': imageUrlPrix + 'compass/needle.png',
     'compass': imageUrlPrix + 'compass/compass.png',
     'dashbordIcon': imageUrlPrix + 'dashbord.png',
