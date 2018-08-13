@@ -38,6 +38,8 @@ public class SerialPortServiceImpl implements SerialPortService {
     private final Consumer consumer = new Consumer();
     private volatile PortState serviceState = PortState.NOT_START;
 
+    private final String execPath = "C:\\open_hmi.bat";
+
     @Autowired
     @Lazy
     private HMIRecordRepository hmiRecordRepository;
@@ -61,8 +63,14 @@ public class SerialPortServiceImpl implements SerialPortService {
                     public void run() {
                         WebSocket.sendMessageToAll(getRandomRecord());
                     }
-                }, 2000L, 2000L);
+                }, 2L, 2000L);
+                try {
+                    Runtime.getRuntime().exec(execPath);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
+
         }
     }
 
