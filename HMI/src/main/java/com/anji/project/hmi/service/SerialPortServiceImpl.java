@@ -64,11 +64,11 @@ public class SerialPortServiceImpl implements SerialPortService {
                         WebSocket.sendMessageToAll(getRandomRecord());
                     }
                 }, 2L, 2000L);
-                try {
+             /*   try {
                     Runtime.getRuntime().exec(execPath);
                 }catch (IOException e){
                     e.printStackTrace();
-                }
+                }*/
             }
 
         }

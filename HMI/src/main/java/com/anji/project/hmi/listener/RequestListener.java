@@ -19,7 +19,6 @@ public class RequestListener implements ServletRequestListener {
     public void requestInitialized(ServletRequestEvent sre) {
         //将所有request请求都携带上httpSession
         HttpSession httpSession = ((HttpServletRequest) sre.getServletRequest()).getSession();
-        System.out.println("将所有request请求都携带上httpSession " + httpSession.getId());
     }
 
     public RequestListener() {

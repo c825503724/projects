@@ -155,14 +155,20 @@ var actionCollections = new ActionCollections();
                                     this.updateCompass(record['theta']);
                                     this.updateBatteryState(record['power']);
                                     this.updateSpeed(record['speed']);
-                                    this.updateLables([record['locationX'],record['locationY'],
+                                    this.updateLabels([record['locationX'],record['locationY'],
                                     record['number'],record['location'],record['targetLocation'],record['route'],record['operationStatus'],record['communicationStatus']]);
                             },
-                            updateLables: function (data) {
+                            updateLabels: function (data) {
                                 var layer = dashbord.layers.labelLayer;
                                 var s = konvaConfig.labelSpace + updateLabel(dashbord.labels[0], dashbord.labelNames[0] + data[0], layer);
+                                var y = 0;
                                 for (var i = 1; i < 8; ++i) {
-                                    var c = updateLabel(dashbord.labels[i], dashbord.labelNames[i] + data[i], layer, s);
+                                    if(s+50 > wWidth){
+                                        debugger;
+                                        s = 0;
+                                        y = y+50;
+                                    }
+                                    var c = updateLabel(dashbord.labels[i], dashbord.labelNames[i] + data[i], layer, s,y);
                                     s = s + c + konvaConfig.labelSpace;
                                 }
                                 layer.draw();
@@ -192,11 +198,12 @@ var actionCollections = new ActionCollections();
                             id: 'batteryLayer'
                         });
                         var compassLayer = speedLayer.clone({
-                            x: wWidth * 1 / 3,
+                            x: wWidth / 3,
                             id: 'compassLayer'
                         });
                         var labelLayer = speedLayer.clone({
-                            y: wHeight - 50,
+                            x:wWidth/20,
+                            y: wHeight - 100,
                             id: 'labelLayer',
                             opacity: .8
                         });
@@ -212,23 +219,16 @@ var actionCollections = new ActionCollections();
                         var x = 10,
                             y = 0;
                         space = konvaConfig.labelSpace;
-                        size = addLabel(x, y, 'x', '', dashbord.labels[0], labelLayer);
-                        size = addLabel(x += (size + space), y, 'y', '', dashbord.labels[1], labelLayer);
-                        size = addLabel(x += (size + space), y, '车号', '', dashbord.labels[2], labelLayer);
-                        size = addLabel(x += (size + space), y, '当前点', '', dashbord.labels[3], labelLayer);
-                        size = addLabel(x += (size + space), y, '目标点', '', dashbord.labels[4], labelLayer);
-                        size = addLabel(x += (size + space), y, '当前段', '', dashbord.labels[5], labelLayer);
-                        size = addLabel(x += (size + space), y, '操作状态', '', dashbord.labels[6], labelLayer);
-                        size = addLabel(x += (size + space), y, '通信状态', '', dashbord.labels[7], labelLayer);
-
-
+                        size = addLabel(x, y, dashbord.labelNames[0], '', dashbord.labels[0], labelLayer);
+                        for(var i=1;i<8;++i){
+                            size = addLabel(x += (size + space), y, dashbord.labelNames[i], '', dashbord.labels[i], labelLayer);
+                        }
                         var iCurrentSpeed = 20,
                             iTargetSpeed = 20,
                             bDecrement = null,
                             job = null;
                         stage.add(speedLayer, batteryLayer, compassLayer, labelLayer);
                         dashbord.hide();
-
                         return dashbord;
 
                         function addCompass(layer) {
@@ -244,7 +244,7 @@ var actionCollections = new ActionCollections();
                             });
                             layer.add(compassKimage);
                             var ImageYoda = imageSource['needle'];
-                            neeldKimage = new Konva.Image({
+                            needleKimage = new Konva.Image({
                                 id: 'needle',
                                 image: ImageYoda,
                                 x: compassKimage.getX() + ImageYoda.width * 1.5 / 2,
@@ -257,8 +257,8 @@ var actionCollections = new ActionCollections();
                                     opacity: .8
                                 }
                             });
-                            dashbord.needle = neeldKimage;
-                            layer.add(neeldKimage);
+                            dashbord.needle = needleKimage;
+                            layer.add(needleKimage);
                         }
 
 
@@ -832,18 +832,17 @@ var actionCollections = new ActionCollections();
                         }
 
                         function addLabel(x, y, label, content, id, layer) {
-                            var seperate = ': ';
                             var kLabel = new Konva.Label({
                                 id: id,
                                 x: x,
-                                y: y,
+                                y: y
                             });
                             kLabel.add(new Konva.Tag({
                                 fill: 'white',
                                 cornerRadius: 5
                             }));
                             kLabel.add(new Konva.Text({
-                                text: label + seperate + content,
+                                text: label  + content,
                                 fontFamily: 'Times New Roman',
                                 fontSize: 20,
                                 padding: 5,
@@ -853,10 +852,13 @@ var actionCollections = new ActionCollections();
                             return kLabel.getText().getTextWidth();
                         }
 
-                        function updateLabel(id, content, layer, x) {
+                        function updateLabel(id, content, layer, x,y) {
                             var kLabel = layer.findOne('#' + id);
-                            if (x) {
+                            if (x != undefined) {
                                 kLabel.x(x);
+                            }
+                            if(y != undefined){
+                                kLabel.y(y);
                             }
                             kLabel.getText().text(content);
                             return kLabel.getText().getTextWidth();
