@@ -7,14 +7,14 @@ var stage = new Konva.Stage({
 });
 
 var konvaConfig = (function () {
-    var imageUrlPrix = '/hmi/img/';
-    var dbLabels = ['position_x', 'position_y', 'car_number', 'current_position', 'target_position', 'current_segment', 'operation_state', 'communication_state'];
-    var dbLabelNames = ['X: ', 'Y: ', '车号：', '当前点: ', '目标点: ', '当前段: ', '操作状态: ', '通信状态: '];
-    var x1 = 5;
-    var x2 = wWidth/2;
-    var xSpace = 40;
-    var x3 = wWidth*8/10;
-    var y1 = wHeight*2/10;
+    var imageUrlPrix = '/hmi/img/',
+        dbLabels = ['position_x', 'position_y', 'car_number', 'current_position', 'target_position', 'current_segment', 'operation_state', 'communication_state'],
+        dbLabelNames = ['X: ', 'Y: ', '车号：', '当前点: ', '目标点: ', '当前段: ', '操作状态: ', '通信状态: '],
+        x1 = 5,
+        x2 = wWidth/2,
+        xSpace = 40,
+        x3 = wWidth*8/10,
+        y1 = wHeight*2/10;
     return{
         dashboardLabels: {
             labels: dbLabels,
@@ -33,6 +33,10 @@ var konvaConfig = (function () {
             'homeIcon': imageUrlPrix + 'home.png',
             'companyLogo':imageUrlPrix+ 'anjiLogo.png',
             'shutdown': imageUrlPrix + 'shutdown.png'
+        },
+        logo:{
+            x:wWidth*7/10,
+            y:wHeight/20
         }
     }
 }());
@@ -70,11 +74,11 @@ var actionCollections = new ActionCollections();
                                 height: wHeight
                             });
                             backgroundLayer.add(backgroundRect);
-                            var imagObj = imagePool['background'];
-                            var kovaImag = new Konva.Image({
+                            var imageObj = imagePool['background'];
+                            var kovaImage = new Konva.Image({
                                 x: 0,
                                 y: 0,
-                                image: imagObj,
+                                image: imageObj,
                                 width: stage.getWidth(),
                                 height: stage.getHeight(),
                                 opacity: 1
@@ -82,8 +86,8 @@ var actionCollections = new ActionCollections();
                             var logoRatio=0.1;
                             var logoImg=imagePool['companyLogo'];
                             var logoImage = new Konva.Image({
-                                x:wWidth*7/10,
-                                y:wHeight/20,
+                                x:konvaConfig.logo.x,
+                                y:konvaConfig.logo.y,
                                 width:logoImg.width*logoRatio,
                                 height:logoImg.height*logoRatio,
                                 image:logoImg
@@ -91,7 +95,7 @@ var actionCollections = new ActionCollections();
                             logoImage.cache();
                             logoImage.filters([Konva.Filters.Brighten]);
                             logoImage.brightness(0.2);
-                            backgroundLayer.add(kovaImag,logoImage);
+                            backgroundLayer.add(kovaImage,logoImage);
                             stage.add(backgroundLayer);
                     }(this));
                     pageCollection.homePage = (function (o) {
@@ -279,7 +283,7 @@ var actionCollections = new ActionCollections();
 
                         //其他运行数据，不易仪表盘化
                         var index1 = 0;
-                        konvaConfig.dashboardLabels.labels.forEach(function (value) {
+                        konvaConfig.dashboardLabels.labels.forEach(function () {
                             addLabel(konvaConfig.dashboardLabels.labelPositions[index1].x,konvaConfig.dashboardLabels.labelPositions[index1].y,
                                 konvaConfig.dashboardLabels.labelNames[index1],'0',konvaConfig.dashboardLabels.labels[index1],labelLayer);
                             ++index1;
@@ -325,29 +329,28 @@ var actionCollections = new ActionCollections();
                         function addSpeedDashboard(layer, v) {
                             var old = layer.findOne('#speed');
                             if (old) {
-                                old.destroy();
+
+                            }else {
+
                             }
                             var speedDashBord = new Konva.Shape({
                                 id: 'speed',
                                 sceneFunc: function (context) {
-                                    drawSpeedDashbord(context, v);
+                                    drawSpeedDashboard(context, v);
                                 }
                             });
                             layer.add(speedDashBord);
 
-                            function drawSpeedDashbord(context, v) {
+                            function drawSpeedDashboard(context, v) {
                                 drawWithInputValue(v);
-
                                 function degToRad(angle) {
                                     // Degrees to radians
                                     return ((angle * Math.PI) / 180);
                                 }
-
                                 function radToDeg(angle) {
                                     // Radians to degree
                                     return ((angle * 180) / Math.PI);
                                 }
-
                                 function drawLine(options, line) {
                                     // Draw a line using the line object passed in
                                     options.ctx.beginPath();
@@ -366,7 +369,6 @@ var actionCollections = new ActionCollections();
                                     );
                                     options.ctx.stroke();
                                 }
-
                                 function createLine(fromX, fromY, toX, toY, fillStyle, lineWidth, alpha) {
                                     // Create a line object using Javascript object notation
                                     return {
@@ -383,7 +385,6 @@ var actionCollections = new ActionCollections();
                                         alpha: alpha
                                     };
                                 }
-
                                 function drawOuterMetallicArc(options) {
                                     /* Draw the metallic border of the speedometer
                                      * Outer grey area
@@ -404,7 +405,6 @@ var actionCollections = new ActionCollections();
                                     // Fill the last object
                                     options.ctx.fill();
                                 }
-
                                 function drawInnerMetallicArc(options) {
                                     /* Draw the metallic border of the speedometer
                                      * Inner white area
@@ -425,7 +425,6 @@ var actionCollections = new ActionCollections();
 
                                     options.ctx.fill();
                                 }
-
                                 function drawMetallicArc(options) {
                                     /* Draw the metallic border of the speedometer
                                      * by drawing two semi-circles, one over lapping
@@ -435,28 +434,23 @@ var actionCollections = new ActionCollections();
                                     drawOuterMetallicArc(options);
                                     drawInnerMetallicArc(options);
                                 }
-
                                 function drawBackground(options) {
                                     /* Black background with alphs transparency to
                                      * blend the edges of the metallic edge and
                                      * black background
                                      */
                                     var i = 0;
-
                                     options.ctx.globalAlpha = 0.2;
                                     options.ctx.fillStyle = "rgb(0,0,0)";
-
                                     // Draw semi-transparent circles
                                     for (i = 120; i < 130; i++) {
                                         options.ctx.beginPath();
-
                                         options.ctx.arc(options.center.X,
                                             options.center.Y,
                                             i,
                                             0,
                                             Math.PI,
                                             true);
-
                                         options.ctx.fill();
                                     }
                                 }
@@ -898,7 +892,8 @@ var actionCollections = new ActionCollections();
                             var kLabel = new Konva.Label({
                                 id: id,
                                 x: x,
-                                y: y
+                                y: y,
+                                width:30
                             });
                             kLabel.add(new Konva.Tag({
                                 fill: 'white',
