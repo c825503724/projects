@@ -17,6 +17,6 @@ websocket.onbeforeunload=function () {
 websocket.onmessage=function (ev) {
     if(ev instanceof MessageEvent){
         var record=JSON.parse(ev.data);
-        pages.dashbord.update(record);
+        pageCollection.dashboard.update(record);
     }
 };

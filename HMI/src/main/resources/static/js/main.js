@@ -5,43 +5,96 @@ var stage = new Konva.Stage({
     width: wWidth,
     height: wHeight
 });
-var imageUrlPrix = '/hmi/img/';
-var konvaConfig = {
-    'labelSpace': 30
-};
-//图片资源
-var source = {
-    'backgroud': imageUrlPrix + 'background.jpg',
-    'dashbord': imageUrlPrix + 'dashbord.png',
-    '25_battery': imageUrlPrix + 'battery/25_battery.png',
-    '50_battery': imageUrlPrix + 'battery/50_battery.png',
-    '75_battery': imageUrlPrix + 'battery/75_battery.png',
-    '100_battery': imageUrlPrix + 'battery/100_battery.png',
-    'needle': imageUrlPrix + 'compass/needle.png',
-    'compass': imageUrlPrix + 'compass/compass.png',
-    'dashbordIcon': imageUrlPrix + 'dashbord.png',
-    'homeIcon': imageUrlPrix + 'home.png'
-};
-//保存image对象
-var imageSource = {};
 
-var pages = {
+var konvaConfig = (function () {
+    var imageUrlPrix = '/hmi/img/';
+    var dbLabels = ['position_x', 'position_y', 'car_number', 'current_position', 'target_position', 'current_segment', 'operation_state', 'communication_state'];
+    var dbLabelNames = ['X: ', 'Y: ', '车号：', '当前点: ', '目标点: ', '当前段: ', '操作状态: ', '通信状态: '];
+    var x1 = 5;
+    var x2 = wWidth/2;
+    var xSpace = 40;
+    var x3 = wWidth*8/10;
+    var y1 = wHeight*2/10;
+    return{
+        dashboardLabels: {
+            labels: dbLabels,
+            labelNames: dbLabelNames,
+            labelPositions:[{x:x1,y:y1},{x:x1,y:y1+xSpace},{x:x2,y:y1},{x:x1,y:y1+2*xSpace},{x:x1,y:y1+3*xSpace},{x:x1,y:y1+4*xSpace},{x:x3,y:y1},{x:x3,y:y1+xSpace}]
+        },
+        imageSources:  {
+            'background': imageUrlPrix + 'background.jpg',
+            'dashboard': imageUrlPrix + 'dashboard.png',
+            '25_battery': imageUrlPrix + 'battery/25_battery.png',
+            '50_battery': imageUrlPrix + 'battery/50_battery.png',
+            '75_battery': imageUrlPrix + 'battery/75_battery.png',
+            '100_battery': imageUrlPrix + 'battery/100_battery.png',
+            'needle': imageUrlPrix + 'compass/needle.png',
+            'compass': imageUrlPrix + 'compass/compass.png',
+            'homeIcon': imageUrlPrix + 'home.png',
+            'companyLogo':imageUrlPrix+ 'anjiLogo.png',
+            'shutdown': imageUrlPrix + 'shutdown.png'
+        }
+    }
+}());
+
+
+//保存image对象
+var imagePool = {};
+
+var pageCollection = {
     homePage: null,
     commonPan: null,
-    dashbord: null
+    dashboard: null,
+    background:null
 };
+
+
 var actionCollections = new ActionCollections();
 //加载图片资源
 (function (o) {
 
         var loaded = 0;
-        for (var k in source) {
-            imageSource[k] = new Image();
-            imageSource[k].onload = function () {
+        for (var k in konvaConfig.imageSources) {
+            imagePool[k] = new Image();
+            imagePool[k].crossOrigin = '';
+            imagePool[k].src = konvaConfig.imageSources[k];
+            imagePool[k].onload = function () {
                 ++loaded;
-                if (loaded == Object.getOwnPropertyNames(source).length) {
-                    backgroudShow();
-                    pages.homePage = (function (o) {
+                if (loaded == Object.getOwnPropertyNames(konvaConfig.imageSources).length) {
+                    pageCollection.background=(function (o) {
+                            var backgroundLayer = new Konva.Layer();
+                            var backgroundRect = new Konva.Rect({
+                                x: 0,
+                                y: 0,
+                                width: wWidth,
+                                height: wHeight
+                            });
+                            backgroundLayer.add(backgroundRect);
+                            var imagObj = imagePool['background'];
+                            var kovaImag = new Konva.Image({
+                                x: 0,
+                                y: 0,
+                                image: imagObj,
+                                width: stage.getWidth(),
+                                height: stage.getHeight(),
+                                opacity: 1
+                            });
+                            var logoRatio=0.1;
+                            var logoImg=imagePool['companyLogo'];
+                            var logoImage = new Konva.Image({
+                                x:wWidth*7/10,
+                                y:wHeight/20,
+                                width:logoImg.width*logoRatio,
+                                height:logoImg.height*logoRatio,
+                                image:logoImg
+                            });
+                            logoImage.cache();
+                            logoImage.filters([Konva.Filters.Brighten]);
+                            logoImage.brightness(0.2);
+                            backgroundLayer.add(kovaImag,logoImage);
+                            stage.add(backgroundLayer);
+                    }(this));
+                    pageCollection.homePage = (function (o) {
                         var homePage = {
                             layer: null,
                             show: function () {
@@ -68,6 +121,7 @@ var actionCollections = new ActionCollections();
                             points: [l_x, l_y_e / 3, l_x_e, l_y_e / 3],
                             stroke: lineColour,
                             strokeWidth: lineWidth,
+                            opacity:.4,
                             lineJoin: 'round'
                         });
                         var row2 = row1.clone({
@@ -80,9 +134,9 @@ var actionCollections = new ActionCollections();
                             points: [l_x_e * 2 / 3, l_y, l_x_e * 2 / 3, l_y_e]
                         });
                         lineGroup.add(column1, column2, row1, row2);
-                        var icon = imageSource['dashbordIcon'];
-                        var kIcon = new Konva.Image({
-                            image: icon,
+                        var dashboardIcon = imagePool['dashboard'];
+                        var dashboardKIcon = new Konva.Image({
+                            image: dashboardIcon,
                             x: wWidth / 2,
                             y: wHeight / 2,
                             height: 200,
@@ -92,14 +146,28 @@ var actionCollections = new ActionCollections();
                                 y: 100
                             }
                         });
-                        kIcon.on('click tap', function () {
-                            actionCollections.dashbordIcon(pages.homePage.layer);
+                        var shutdownKicon = new Konva.Image({
+                            image:imagePool['shutdown'],
+                            x:wWidth/6,
+                            y:wHeight/6,
+                            height:100,
+                            width:100,
+                            offset:{
+                                x:25,
+                                y:25
+                            }
                         });
-                        layer.add(kIcon);
+                        dashboardKIcon.on('click tap', function () {
+                            actionCollections.dashbordIcon(pageCollection.homePage.layer);
+                        });
+                        shutdownKicon.on('click tap',function () {
+                            actionCollections.shutdown();
+                        });
+                        layer.add(dashboardKIcon,shutdownKicon);
                         stage.add(layer);
                         return homePage;
                     }(this));
-                    pages.commonPan = (function (o) {
+                    pageCollection.commonPan = (function (o) {
                         var commonPan = {
                             show: function () {
                                 commonPan.layer.show();
@@ -112,7 +180,7 @@ var actionCollections = new ActionCollections();
                         commonPan.layer = commonLayer;
                         var Kicon = new Konva.Image(
                             {
-                                image: imageSource['homeIcon'],
+                                image: imagePool['homeIcon'],
                                 x: wWidth / 30,
                                 y: wHeight / 20,
                                 width: wWidth / 10,
@@ -125,11 +193,11 @@ var actionCollections = new ActionCollections();
                         commonLayer.hide();
                         return commonPan;
                     }(this));
-                    pages.dashbord = (function (o) {
-                        var dashbord = {
+                    pageCollection.dashboard = (function (o) {
+                        var dashboard = {
                             layers: {},
-                            labels: ['position_x', 'position_y', 'car_number', 'current_position', 'target_position', 'current_segment', 'operation_state', 'communication_state'],
-                            labelNames: ['X: ', 'Y: ', '车号：', '当前点: ', '目标点: ', '当前段: ', '操作状态: ', '通信状态: '],
+                            labels: konvaConfig.dashboardLabels.labels,
+                            labelNames: konvaConfig.dashboardLabels.labelNames,
                             speedConfig: {
                                 'iCurrentSpeed': 0,
                                 'iTargetSpeed': 0,
@@ -137,18 +205,18 @@ var actionCollections = new ActionCollections();
                                 'job': null
                             },
                             draw: function () {
-                                for (var o in dashbord.layers) {
-                                    dashbord.layers[o].draw();
+                                for (var o in dashboard.layers) {
+                                    dashboard.layers[o].draw();
                                 }
                             },
                             hide: function () {
-                                for (var o in dashbord.layers) {
-                                    dashbord.layers[o].hide();
+                                for (var o in dashboard.layers) {
+                                    dashboard.layers[o].hide();
                                 }
                             },
                             show: function () {
-                                for (var o in dashbord.layers) {
-                                    dashbord.layers[o].show();
+                                for (var o in dashboard.layers) {
+                                    dashboard.layers[o].show();
                                 }
                             },
                             update: function (record) {
@@ -159,30 +227,24 @@ var actionCollections = new ActionCollections();
                                     record['number'],record['location'],record['targetLocation'],record['route'],record['operationStatus'],record['communicationStatus']]);
                             },
                             updateLabels: function (data) {
-                                var layer = dashbord.layers.labelLayer;
-                                var s = konvaConfig.labelSpace + updateLabel(dashbord.labels[0], dashbord.labelNames[0] + data[0], layer);
-                                var y = 0;
-                                for (var i = 1; i < 8; ++i) {
-                                    if(s+50 > wWidth){
-                                        debugger;
-                                        s = 0;
-                                        y = y+50;
-                                    }
-                                    var c = updateLabel(dashbord.labels[i], dashbord.labelNames[i] + data[i], layer, s,y);
-                                    s = s + c + konvaConfig.labelSpace;
-                                }
+                                var layer = dashboard.layers.labelLayer;
+                                var index = 0;
+                                konvaConfig.dashboardLabels.labels.forEach(function (value) {
+                                    updateLabel(value,konvaConfig.dashboardLabels.labelNames[index]+data[index],layer);
+                                    ++index;
+                                });
                                 layer.draw();
                             },
                             updateCompass: function (data) {
-                                dashbord.needle.to({rotation: data, duration: 1});
+                                dashboard.needle.to({rotation: data, duration: 1});
                             },
                             updateSpeed: function (data) {
-                                var layer = dashbord.layers.speedLayer;
-                                addSpeedDashbord(layer, data);
+                                var layer = dashboard.layers.speedLayer;
+                                addSpeedDashboard(layer, data);
                                 layer.draw();
                             },
                             updateBatteryState: function (data) {
-                                var layer = dashbord.layers.batteryLayer;
+                                var layer = dashboard.layers.batteryLayer;
                                 addBattery(layer, data);
                                 layer.draw();
                             }
@@ -198,41 +260,41 @@ var actionCollections = new ActionCollections();
                             id: 'batteryLayer'
                         });
                         var compassLayer = speedLayer.clone({
-                            x: wWidth / 3,
+                            x: wWidth / 3*1.1,
                             id: 'compassLayer'
                         });
                         var labelLayer = speedLayer.clone({
-                            x:wWidth/20,
-                            y: wHeight - 100,
+                            x:0,
+                            y: 0,
                             id: 'labelLayer',
                             opacity: .8
                         });
-                        dashbord.layers.labelLayer = labelLayer;
-                        dashbord.layers.speedLayer = speedLayer;
-                        dashbord.layers.batteryLayer = batteryLayer;
-                        dashbord.layers.compassLayer = compassLayer;
+                        dashboard.layers.labelLayer = labelLayer;
+                        dashboard.layers.speedLayer = speedLayer;
+                        dashboard.layers.batteryLayer = batteryLayer;
+                        dashboard.layers.compassLayer = compassLayer;
                         addCompass(compassLayer);
                         addBattery(batteryLayer, 0);
-                        addSpeedDashbord(speedLayer, 0);
+                        addSpeedDashboard(speedLayer, 0);
 
                         //其他运行数据，不易仪表盘化
-                        var x = 10,
-                            y = 0;
-                        space = konvaConfig.labelSpace;
-                        size = addLabel(x, y, dashbord.labelNames[0], '', dashbord.labels[0], labelLayer);
-                        for(var i=1;i<8;++i){
-                            size = addLabel(x += (size + space), y, dashbord.labelNames[i], '', dashbord.labels[i], labelLayer);
-                        }
+                        var index1 = 0;
+                        konvaConfig.dashboardLabels.labels.forEach(function (value) {
+                            addLabel(konvaConfig.dashboardLabels.labelPositions[index1].x,konvaConfig.dashboardLabels.labelPositions[index1].y,
+                                konvaConfig.dashboardLabels.labelNames[index1],'0',konvaConfig.dashboardLabels.labels[index1],labelLayer);
+                            ++index1;
+                        });
+
                         var iCurrentSpeed = 20,
                             iTargetSpeed = 20,
                             bDecrement = null,
                             job = null;
                         stage.add(speedLayer, batteryLayer, compassLayer, labelLayer);
-                        dashbord.hide();
-                        return dashbord;
+                        dashboard.hide();
+                        return dashboard;
 
                         function addCompass(layer) {
-                            var compassImage = imageSource['compass'];
+                            var compassImage = imagePool['compass'];
                             var compassKimage = new Konva.Image({
                                 id: 'compass',
                                 image: compassImage,
@@ -243,7 +305,7 @@ var actionCollections = new ActionCollections();
                                 opacity: .8
                             });
                             layer.add(compassKimage);
-                            var ImageYoda = imageSource['needle'];
+                            var ImageYoda = imagePool['needle'];
                             needleKimage = new Konva.Image({
                                 id: 'needle',
                                 image: ImageYoda,
@@ -257,12 +319,10 @@ var actionCollections = new ActionCollections();
                                     opacity: .8
                                 }
                             });
-                            dashbord.needle = needleKimage;
+                            dashboard.needle = needleKimage;
                             layer.add(needleKimage);
                         }
-
-
-                        function addSpeedDashbord(layer, v) {
+                        function addSpeedDashboard(layer, v) {
                             var old = layer.findOne('#speed');
                             if (old) {
                                 old.destroy();
@@ -806,7 +866,6 @@ var actionCollections = new ActionCollections();
                                 }
                             }
                         }
-
                         function addBattery(layer, v) {
                             var old = layer.findOne('#battery');
                             if (old) {
@@ -814,23 +873,27 @@ var actionCollections = new ActionCollections();
                             }
                             var batteryImage;
                             if (v <= 0.25) {
-                                batteryImage = imageSource['25_battery'];
+                                batteryImage = imagePool['25_battery'];
                             } else if (v <= 0.5) {
-                                batteryImage = imageSource['50_battery'];
+                                batteryImage = imagePool['50_battery'];
                             } else if (v <= 0.75) {
-                                batteryImage = imageSource['75_battery'];
+                                batteryImage = imagePool['75_battery'];
                             } else {
-                                batteryImage = imageSource['100_battery'];
+                                batteryImage = imagePool['100_battery'];
                             }
-                            batteryKimage = new Konva.Image({
+                            var imageRatio=0.6;
+                            var b_w=batteryImage.width*imageRatio;
+                            var b_h=batteryImage.height*imageRatio;
+                            var batteryKimage = new Konva.Image({
                                 id: 'battery',
                                 image: batteryImage,
-                                x: 0,
-                                y: 0
+                                x: 60,
+                                y: 100,
+                                width:b_w,
+                                height:b_h
                             });
                             layer.add(batteryKimage);
                         }
-
                         function addLabel(x, y, label, content, id, layer) {
                             var kLabel = new Konva.Label({
                                 id: id,
@@ -851,46 +914,14 @@ var actionCollections = new ActionCollections();
                             layer.add(kLabel);
                             return kLabel.getText().getTextWidth();
                         }
-
-                        function updateLabel(id, content, layer, x,y) {
+                        function updateLabel(id, content, layer) {
                             var kLabel = layer.findOne('#' + id);
-                            if (x != undefined) {
-                                kLabel.x(x);
-                            }
-                            if(y != undefined){
-                                kLabel.y(y);
-                            }
                             kLabel.getText().text(content);
                             return kLabel.getText().getTextWidth();
                         }
-
                     }(this));
-
-                    function backgroudShow() {
-                        var backgroundLayer = new Konva.Layer();
-
-                        var backgroundRect = new Konva.Rect({
-                            x: 0,
-                            y: 0,
-                            width: wWidth,
-                            height: wHeight
-                        });
-                        backgroundLayer.add(backgroundRect);
-                        var imagObj = imageSource['backgroud'];
-                        var kovaImag = new Konva.Image({
-                            x: 0,
-                            y: 0,
-                            image: imagObj,
-                            width: stage.getWidth(),
-                            height: stage.getHeight(),
-                            opacity: 1
-                        });
-                        backgroundLayer.add(kovaImag);
-                        stage.add(backgroundLayer);
-                    }
                 }
             }
-            imageSource[k].src = source[k];
         }
 
     }
@@ -900,16 +931,23 @@ var actionCollections = new ActionCollections();
 function ActionCollections() {
     this.homeIcon = function (layer) {
         layer.hide();
-        pages.dashbord.hide();
-        pages.homePage.layer.show();
+        pageCollection.dashboard.hide();
+        pageCollection.homePage.layer.show();
     };
     this.dashbordIcon = function (layer) {
         layer.hide();
-        pages.commonPan.show();
-        pages.dashbord.show();
-    }
+        pageCollection.commonPan.show();
+        pageCollection.dashboard.show();
+    };
+
+    this.shutdown = function () {
+
+    };
 }
 
+function screen_pixel_ratio(x,screen_x,ratio){
+    return screen_x*ratio/x;
+}
 
 
 

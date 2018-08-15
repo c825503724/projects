@@ -47,7 +47,7 @@ public class MainController {
 
     @RequestMapping("dashbord")
     public String dashbord() {
-        return "dashbord";
+        return "dashboard";
     }
 
     @RequestMapping("start")
