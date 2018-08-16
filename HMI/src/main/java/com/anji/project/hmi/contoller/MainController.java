@@ -36,7 +36,7 @@ public class MainController {
     @RequestMapping("show")
     public String show(Model model) {
         model.addAttribute("hello", "ok");
-        return "index";
+        return "demo1";
     }
 
     @RequestMapping("getLatest")

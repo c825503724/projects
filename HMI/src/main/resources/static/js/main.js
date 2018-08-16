@@ -5,7 +5,10 @@ var stage = new Konva.Stage({
     width: wWidth,
     height: wHeight
 });
-
+var iCurrentSpeed = 20,
+    iTargetSpeed = 20,
+    bDecrement = null,
+    job = null;
 var konvaConfig = (function () {
     var imageUrlPrix = '/hmi/img/',
         dbLabels = ['position_x', 'position_y', 'car_number', 'current_position', 'target_position', 'current_segment', 'operation_state', 'communication_state'],
@@ -37,6 +40,17 @@ var konvaConfig = (function () {
         logo:{
             x:wWidth*7/10,
             y:wHeight/20
+        },
+        dashboard:{
+            speedBoard:{
+
+            },
+            compassBoard:{
+
+            },
+            batteryBoard:{
+
+            }
         }
     }
 }());
@@ -55,8 +69,7 @@ var pageCollection = {
 
 var actionCollections = new ActionCollections();
 //加载图片资源
-(function (o) {
-
+(function () {
         var loaded = 0;
         for (var k in konvaConfig.imageSources) {
             imagePool[k] = new Image();
@@ -162,7 +175,7 @@ var actionCollections = new ActionCollections();
                             }
                         });
                         dashboardKIcon.on('click tap', function () {
-                            actionCollections.dashbordIcon(pageCollection.homePage.layer);
+                            actionCollections.dashboardIcon(pageCollection.homePage.layer);
                         });
                         shutdownKicon.on('click tap',function () {
                             actionCollections.shutdown();
@@ -202,12 +215,6 @@ var actionCollections = new ActionCollections();
                             layers: {},
                             labels: konvaConfig.dashboardLabels.labels,
                             labelNames: konvaConfig.dashboardLabels.labelNames,
-                            speedConfig: {
-                                'iCurrentSpeed': 0,
-                                'iTargetSpeed': 0,
-                                'bDecrement': null,
-                                'job': null
-                            },
                             draw: function () {
                                 for (var o in dashboard.layers) {
                                     dashboard.layers[o].draw();
@@ -289,10 +296,7 @@ var actionCollections = new ActionCollections();
                             ++index1;
                         });
 
-                        var iCurrentSpeed = 20,
-                            iTargetSpeed = 20,
-                            bDecrement = null,
-                            job = null;
+
                         stage.add(speedLayer, batteryLayer, compassLayer, labelLayer);
                         dashboard.hide();
                         return dashboard;
@@ -329,17 +333,15 @@ var actionCollections = new ActionCollections();
                         function addSpeedDashboard(layer, v) {
                             var old = layer.findOne('#speed');
                             if (old) {
-
-                            }else {
-
+                                old.destroy();
                             }
-                            var speedDashBord = new Konva.Shape({
-                                id: 'speed',
-                                sceneFunc: function (context) {
-                                    drawSpeedDashboard(context, v);
-                                }
-                            });
-                            layer.add(speedDashBord);
+                                var speedDashBord = new Konva.Shape({
+                                    id: 'speed',
+                                    sceneFunc: function (context) {
+                                        drawSpeedDashboard(context, v);
+                                    }
+                                });
+                                layer.add(speedDashBord);
 
                             function drawSpeedDashboard(context, v) {
                                 drawWithInputValue(v);
@@ -920,7 +922,7 @@ var actionCollections = new ActionCollections();
         }
 
     }
-    (this)
+    ()
 );
 
 function ActionCollections() {
@@ -929,7 +931,7 @@ function ActionCollections() {
         pageCollection.dashboard.hide();
         pageCollection.homePage.layer.show();
     };
-    this.dashbordIcon = function (layer) {
+    this.dashboardIcon = function (layer) {
         layer.hide();
         pageCollection.commonPan.show();
         pageCollection.dashboard.show();
