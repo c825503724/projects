@@ -1,6 +1,5 @@
 package com.anji.project.hmi.service;
 
-import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 

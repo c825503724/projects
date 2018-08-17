@@ -55,7 +55,6 @@ public class SerialPortServiceImpl implements SerialPortService {
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ApplicationReadyEvent) {
             start();
-            System.out.println("start!");
             if (mock) {
                 Timer timer = new Timer();
                 timer.scheduleAtFixedRate(new TimerTask() {

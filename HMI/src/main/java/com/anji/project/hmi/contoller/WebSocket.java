@@ -29,7 +29,6 @@ public class WebSocket {
 
     @OnOpen
     public void onOpen(Session session,EndpointConfig endpointConfig) {
-        String httpSessionId=(String)endpointConfig.getUserProperties().get("sessionId");
         this.session = session;
         sockets.add(this);
         liveLinks.addAndGet(1);

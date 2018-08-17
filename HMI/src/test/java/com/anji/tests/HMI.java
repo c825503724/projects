@@ -10,20 +10,17 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = HMIApplication.class)
 public class HMI {
 
-    @Autowired
-    private HMIRecordRepository hmiRecordRepository;
-
-    @Autowired
-    private SerialPortService serialPortService;
 
     @Test
     public void ss() {
-        HMIRecord record = new HMIRecord();
+/*        HMIRecord record = new HMIRecord();
         record.setNumber(1);
         record.setLocationY(2.1F);
         record.setLocationX(2.5F);
@@ -34,15 +31,16 @@ public class HMI {
         record.setRoute(22);
         record.setTargetLocation(222);
         record.setPower(2.0F);
-        record.setTheta(2.1F);
+        record.setTheta(2.1F);*/
 
     }
 
     @Test
-    public void str()throws Exception{
-        String op="{\"msgType\":\"INIT\",\"id\":\"4c9c05ce-777d-4dbb-80dd-b1573f457e6e\",\"content\": {\"config\":{\"host\":\"10.105.23.254\",\"port\":7070,\"tcpNodelay\":true,\"timeoutTime\":30,\"timeoutTimeUnit\":\"SECONDS\"},\"userId\":\"235\"}}";
-        JSONParser jsonParser=new JSONParser(op);
-        jsonParser.parseMap();
+    public void str() throws Exception{
+        Field f = Unsafe.class.getDeclaredField("theUnsafe");
+        f.setAccessible(true);
+        Unsafe unsafe =(Unsafe) f.get(null);
+        System.out.println();
     }
 
 

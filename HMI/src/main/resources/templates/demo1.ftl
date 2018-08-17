@@ -26,10 +26,10 @@
 
 <div id="container" style="position: absolute">
 </div>
-<div style="position: fixed">
+<div style="position: fixed;width: 0;height: 0">
     <canvas id="speedGauge"></canvas>
 </div>
-<div style="position: fixed">
+<div style="position: fixed;width: 0;height: 0">
     <canvas id="compassGauge"></canvas>
 </div>
 </body>

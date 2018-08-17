@@ -223,8 +223,8 @@ var actionCollections = new ActionCollections();
                                 for (var o in dashboard.layers) {
                                     dashboard.layers[o].hide();
                                 }
-                                $("#speedGauge").show();
-                                $("#compassGauge").show();
+                                $("#speedGauge").hide();
+                                $("#compassGauge").hide();
                             },
                             show: function () {
                                 for (var o in dashboard.layers) {
@@ -457,7 +457,6 @@ var actionCollections = new ActionCollections();
 
 function ActionCollections() {
     this.homeIcon = function (layer) {
-        debugger;
         layer.hide();
         pageCollection.dashboard.hide();
         pageCollection.homePage.layer.show();

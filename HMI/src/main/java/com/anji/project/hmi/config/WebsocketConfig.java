@@ -24,7 +24,7 @@ public class WebsocketConfig extends ServerEndpointConfig.Configurator {
 
     @Override
     public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
-        /*如果没有监听器,那么这里获取到的HttpSession是null*/
+
         StandardSessionFacade ssf = (StandardSessionFacade) request.getHttpSession();
         if (ssf != null) {
             HttpSession httpSession = (HttpSession) request.getHttpSession();
