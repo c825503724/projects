@@ -377,7 +377,7 @@ var actionCollections = new ActionCollections();
                                 colorBorderOuter:"#ccc",
                                 colorBorderOuterEnd:"#ccc",
                                 colorNeedleShadowDown:"#222",
-                                animationTarget:"palte",
+                                animationTarget:"plate",
                                 animationDuration:1500,
                                 animationRule:"linear",
                                 unit:"ᵍ",
